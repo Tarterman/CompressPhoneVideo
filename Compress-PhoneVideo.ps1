@@ -51,25 +51,12 @@ function Compress-PhoneVideo {
             $streamInfo = (& $ffprobeExe -v quiet -print_format json -show_streams $file.FullName) | ConvertFrom-Json
             $videoStreamInfo = $streamInfo.streams | Where-Object codec_type -eq video
             $videoCodec = $videoStreamInfo.codec_name
-            $audioStreamInfo = $streamInfo.streams | Where-Object codec_type -eq audio
-            $audioCodec = $audioStreamInfo.codec_name
 
-            $default = $false
             switch ($videoCodec) {
                 'hevc'  {$vcodec = 'libx265'}
                 'vp9'   {$vcodec = 'libvpx-vp9'}
                 'h264'  {$vcodec = 'libx264'}
-                default {$default = $true}
-            }
-
-            switch ($audioCodec) {
-                'aac'   {$acodec = 'aac'}
-                default {$default = $true}
-            }
-
-            if ($default) {
-                Write-Warning "The video codec $($videoCodec) and/or the audio codec $($audioCodec) needs to be added to the switch statements. File $($file.Name) is skipped."
-                continue
+                default {$vcodec = 'libx265'}
             }
 
             # Create output directory if it doesn't exist
@@ -79,7 +66,7 @@ function Compress-PhoneVideo {
 
             # Compress video using ffmpeg
             $newFileName = "$($file.BaseName)_conv$($file.Extension)"
-            & $ffmpegExe -hide_banner -loglevel warning -i $file.FullName -c:v $vcodec -c:a $acodec "$($VideoFolder)\Converted\$($newFileName)"
+            & $ffmpegExe -hide_banner -loglevel warning -i $file.FullName -c:v $vcodec -c:a 'aac' -b:a 256k "$($VideoFolder)\Converted\$($newFileName)"
 
             # Set the CreationTime and LastWriteTime timestamp to match the 'Media Created' timestamp from original file
             $machineTimeZone = Get-TimeZone
