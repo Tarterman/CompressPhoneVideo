@@ -28,7 +28,7 @@ function Compress-PhoneVideo {
 
     process {
         $currentFile = 1
-        $files = Get-ChildItem -Path $VideoFolder | Where-Object {$_.extension -in ".mp4"}
+        $files = Get-ChildItem -Path $VideoFolder | Where-Object {$_.extension -in ".mp4",".avi",".mkv",".mov"}
         foreach ($file in $files) {
             Write-Progress -Activity "Analyzing video $($currentFile) of $($files.Count)." -PercentComplete (($currentFile / $files.Count) * 100)
             
